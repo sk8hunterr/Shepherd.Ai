@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.trash_pycache/
+
+outputs/archive/
+outputs/latest_run/
+outputs/*.png
+outputs/*.json
+outputs/*.txt
+
+data/cache/
+data/external/
+
+.venv/
+.env

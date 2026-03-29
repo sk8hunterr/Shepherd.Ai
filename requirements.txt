@@ -1,0 +1,8 @@
+numpy>=1.26
+pandas>=2.2
+matplotlib>=3.8
+scikit-learn>=1.5
+lightkurve>=2.5
+astropy>=6.1
+streamlit>=1.44
+requests>=2.32

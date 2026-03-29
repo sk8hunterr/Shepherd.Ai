@@ -1,0 +1,131 @@
+Exoplanet Transit Baseline Run
+================================
+Stage: stage2
+Data status: Loaded real Kepler data for 105 light curves across 35 requested targets.
+
+Loaded light curves:
+target_name source  num_points  time_start   time_end
+  Kepler-10 kepler         469  120.539147 130.245395
+  Kepler-10 kepler        1624  131.512315 164.983391
+  Kepler-10 kepler        4070  169.764943 258.466984
+  Kepler-11 kepler        1624  131.512045 164.983709
+  Kepler-11 kepler        4070  169.765335 258.468021
+  Kepler-11 kepler        4134  260.245694 349.495755
+  Kepler-18 kepler         469  120.538528 130.244905
+  Kepler-18 kepler        1624  131.511842 164.983428
+  Kepler-18 kepler        4070  169.765042 258.467919
+  Kepler-20 kepler        1624  131.512644 164.984029
+  Kepler-20 kepler        4070  169.765597 258.467400
+  Kepler-20 kepler        4134  260.245085 349.495445
+  Kepler-22 kepler         469  120.539007 130.245305
+  Kepler-22 kepler        1624  131.512231 164.983480
+  Kepler-22 kepler        4070  169.765071 258.467283
+  Kepler-37 kepler         469  120.539519 130.245834
+  Kepler-37 kepler        1624  131.512761 164.983968
+  Kepler-37 kepler        4070  169.765498 258.467086
+  Kepler-62 kepler        1624  131.512760 164.983916
+  Kepler-62 kepler        4070  169.765439 258.467000
+  Kepler-62 kepler        4134  260.244660 349.495544
+  Kepler-69 kepler        1624  131.512166 164.983626
+  Kepler-69 kepler        4070  169.765230 258.467666
+  Kepler-69 kepler        4134  260.245319 349.495827
+  Kepler-90 kepler        1624  131.512439 164.983511
+  Kepler-90 kepler        4070  169.765060 258.466948
+  Kepler-90 kepler        4134  260.244605 349.495923
+ Kepler-186 kepler        1624  131.511839 164.983468
+ Kepler-186 kepler        4070  169.765087 258.467992
+ Kepler-186 kepler        4134  260.245693 349.495981
+ Kepler-296 kepler        1624  131.512316 164.983441
+ Kepler-296 kepler        4070  169.765000 258.467067
+ Kepler-296 kepler        4134  260.244726 349.495990
+ Kepler-438 kepler        1624  131.513056 164.984260
+ Kepler-438 kepler        4070  169.765810 258.467035
+ Kepler-438 kepler        4134  260.244670 349.495221
+ Kepler-442 kepler        1624  131.512976 164.984379
+ Kepler-442 kepler        4070  169.765949 258.467372
+ Kepler-442 kepler        4134  260.245025 349.495116
+ Kepler-452 kepler         469  120.538682 130.245058
+ Kepler-452 kepler        1624  131.511994 164.983546
+ Kepler-452 kepler        4070  169.765180 258.467847
+ Kepler-440 kepler        1624  131.512836 164.984175
+ Kepler-440 kepler        4070  169.765762 258.467299
+ Kepler-440 kepler        4134  260.244965 349.495306
+ Kepler-444 kepler         469  120.539245 130.245627
+ Kepler-444 kepler        1624  131.512564 164.984033
+ Kepler-444 kepler        4070  169.765629 258.467591
+Kepler-1649 kepler        4272  539.470571 629.296697
+Kepler-1649 kepler        4226  630.195740 719.548098
+Kepler-1649 kepler        3106  735.383650 802.344573
+Kepler-1544 kepler        1624  131.511694 164.983095
+Kepler-1544 kepler        4070  169.764696 258.467655
+Kepler-1544 kepler        4134  260.245346 349.496326
+Kepler-1638 kepler        1624  131.511837 164.983222
+Kepler-1638 kepler        4070  169.764817 258.467596
+Kepler-1638 kepler        4134  260.245283 349.496206
+Kepler-1652 kepler        1624  131.511835 164.983142
+Kepler-1652 kepler        4070  169.764728 258.467466
+Kepler-1652 kepler        4134  260.245155 349.496278
+   Kepler-5 kepler         469  120.538455 130.244845
+   Kepler-5 kepler        1624  131.511784 164.983428
+   Kepler-5 kepler        4070  169.765051 258.468030
+   Kepler-7 kepler         469  120.539351 130.245734
+   Kepler-7 kepler        1624  131.512671 164.984121
+   Kepler-7 kepler        4070  169.765712 258.467537
+   Kepler-8 kepler         469  120.539794 130.246118
+   Kepler-8 kepler        1624  131.513046 164.984224
+   Kepler-8 kepler        4070  169.765772 258.466994
+   Kepler-9 kepler        1624  131.513013 164.984448
+   Kepler-9 kepler        4070  169.766021 258.467418
+   Kepler-9 kepler        4134  260.245069 349.495051
+  Kepler-12 kepler         469  120.539122 130.245376
+  Kepler-12 kepler        1624  131.512296 164.983394
+  Kepler-12 kepler        4070  169.764950 258.467024
+  Kepler-13 kepler         469  120.539195 130.245495
+  Kepler-13 kepler        1624  131.512421 164.983641
+  Kepler-13 kepler        4070  169.765224 258.467192
+  Kepler-14 kepler         469  120.539127 130.245425
+  Kepler-14 kepler        1624  131.512351 164.983577
+  Kepler-14 kepler        4070  169.765162 258.467217
+  Kepler-15 kepler        1624  131.511763 164.983142
+  Kepler-15 kepler        4070  169.764739 258.467603
+  Kepler-15 kepler        4134  260.245292 349.496281
+  Kepler-16 kepler         469  120.538886 130.245130
+  Kepler-16 kepler        1624  131.512050 164.983163
+  Kepler-16 kepler        4070  169.764698 258.467086
+  Kepler-17 kepler        1624  131.511704 164.983183
+  Kepler-17 kepler        4070  169.764772 258.467781
+  Kepler-17 kepler        4134  260.245462 349.496245
+  Kepler-19 kepler         469  120.539322 130.245756
+  Kepler-19 kepler        1624  131.512699 164.984306
+  Kepler-19 kepler        4070  169.765930 258.467782
+  Kepler-21 kepler         469  120.539531 130.245937
+  Kepler-21 kepler        1624  131.512876 164.984360
+  Kepler-21 kepler        4070  169.765943 258.467532
+  Kepler-68 kepler         469  120.538853 130.245143
+  Kepler-68 kepler        1624  131.512069 164.983325
+  Kepler-68 kepler        4070  169.764892 258.467312
+  Kepler-70 kepler        4070  169.765433 258.468015
+  Kepler-70 kepler        4486  443.510228 538.162721
+  Kepler-70 kepler        4272  539.470499 629.296975
+ Kepler-130 kepler         469  120.539395 130.245788
+ Kepler-130 kepler        1624  131.512726 164.984199
+ Kepler-130 kepler        4070  169.765791 258.467562
+
+Requested targets: 35
+Loaded light curves: 105
+Number of windows: 2708
+Number of labeled examples: 2708
+Training examples: 2031
+Test examples: 677
+
+Metrics:
+- accuracy: 0.8449
+- precision: 0.8839
+- recall: 0.7988
+- f1_score: 0.8392
+
+Saved model path: C:\Users\belvo\OneDrive\Desktop\Research Project\models\baseline_stage2_model.joblib
+
+Confusion matrix:
+[[298  36]
+ [ 69 274]]
