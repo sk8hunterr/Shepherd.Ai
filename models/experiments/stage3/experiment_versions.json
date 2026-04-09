@@ -1,0 +1,76 @@
+{
+  "checkpoint_version": "1.2",
+  "experiments": [
+    {
+      "display_name": "SHEP 1.1.1",
+      "numeric_version": "1.1.1",
+      "path": "shep_1_1_1_logistic_regression_20260331_153832.joblib",
+      "model_name": "logistic_regression",
+      "backfilled": true
+    },
+    {
+      "display_name": "SHEP 1.1.2",
+      "numeric_version": "1.1.2",
+      "path": "shep_1_1_2_logistic_regression_20260407_125948.joblib",
+      "model_name": "logistic_regression",
+      "recommended_threshold": 0.022,
+      "created_at": "2026-04-07T12:59:48"
+    },
+    {
+      "display_name": "SHEP 1.1.3",
+      "numeric_version": "1.1.3",
+      "path": "shep_1_1_3_logistic_regression_20260407_144702.joblib",
+      "model_name": "logistic_regression",
+      "recommended_threshold": 0.0046,
+      "created_at": "2026-04-07T14:47:02"
+    },
+    {
+      "display_name": "SHEP 1.1.4",
+      "numeric_version": "1.1.4",
+      "path": "shep_1_1_4_logistic_regression_20260407_151622.joblib",
+      "model_name": "logistic_regression",
+      "recommended_threshold": 0.0258,
+      "created_at": "2026-04-07T15:16:22"
+    },
+    {
+      "display_name": "SHEP 1.1.5",
+      "numeric_version": "1.1.5",
+      "path": "shep_1_1_5_hist_gradient_boosting_20260407_160436.joblib",
+      "model_name": "hist_gradient_boosting",
+      "recommended_threshold": 0.0736,
+      "created_at": "2026-04-07T16:04:36"
+    },
+    {
+      "display_name": "SHEP 1.1.6",
+      "numeric_version": "1.1.6",
+      "path": "shep_1_1_6_logistic_regression_20260407_165642.joblib",
+      "model_name": "logistic_regression",
+      "recommended_threshold": 0.4194,
+      "created_at": "2026-04-07T16:56:42"
+    },
+    {
+      "display_name": "SHEP 1.1.7",
+      "numeric_version": "1.1.7",
+      "path": "shep_1_1_7_logistic_regression_20260407_171514.joblib",
+      "model_name": "logistic_regression",
+      "recommended_threshold": 0.4194,
+      "created_at": "2026-04-07T17:15:14"
+    },
+    {
+      "display_name": "SHEP 1.1.8",
+      "numeric_version": "1.1.8",
+      "path": "shep_1_1_8_hist_gradient_boosting_20260409_133744.joblib",
+      "model_name": "hist_gradient_boosting",
+      "recommended_threshold": 0.5836,
+      "created_at": "2026-04-09T13:37:44"
+    },
+    {
+      "display_name": "SHEP 1.1.9",
+      "numeric_version": "1.1.9",
+      "path": "shep_1_1_9_hist_gradient_boosting_20260409_141045.joblib",
+      "model_name": "hist_gradient_boosting",
+      "recommended_threshold": 0.5201,
+      "created_at": "2026-04-09T14:10:45"
+    }
+  ]
+}

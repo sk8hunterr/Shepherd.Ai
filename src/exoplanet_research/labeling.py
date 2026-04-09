@@ -15,10 +15,12 @@ class LabeledExample:
     """One supervised learning example."""
 
     target_name: str
+    time: np.ndarray
     flux: np.ndarray
     label: int
     injected: bool
     source: str
+    example_role: str = "unclassified"
 
 
 def inject_box_transit(
@@ -59,10 +61,14 @@ def create_labeled_examples(
         examples.append(
             LabeledExample(
                 target_name=window.target_name,
+                time=window.time_window,
                 flux=flux,
                 label=int(make_transit),
                 injected=make_transit,
                 source=window.source,
+                example_role=(
+                    "synthetic_transit_window" if make_transit else "synthetic_background_window"
+                ),
             )
         )
 
@@ -74,3 +80,27 @@ def examples_to_arrays(examples: list[LabeledExample]) -> tuple[np.ndarray, np.n
     X = np.vstack([example.flux for example in examples])
     y = np.array([example.label for example in examples], dtype=int)
     return X, y
+
+
+def examples_to_time_array(examples: list[LabeledExample]) -> np.ndarray:
+    """Convert example time windows into a model-side context array."""
+    return np.vstack([example.time for example in examples])
+
+
+def examples_to_arrays_with_targets(
+    examples: list[LabeledExample],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Convert examples into arrays and preserve target names for group-aware splitting."""
+    X, y = examples_to_arrays(examples)
+    target_names = np.array([example.target_name for example in examples], dtype=object)
+    return X, y, target_names
+
+
+def examples_to_arrays_with_metadata(
+    examples: list[LabeledExample],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Convert examples into arrays and preserve target and example-role metadata."""
+    X, y, target_names = examples_to_arrays_with_targets(examples)
+    time_windows = examples_to_time_array(examples)
+    example_roles = np.array([example.example_role for example in examples], dtype=object)
+    return X, y, target_names, time_windows, example_roles

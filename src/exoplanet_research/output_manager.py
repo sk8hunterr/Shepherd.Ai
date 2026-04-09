@@ -21,7 +21,13 @@ def prepare_output_directory(output_root: Path) -> Path:
     if latest_run.exists() and any(latest_run.iterdir()):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         archived_run = archive_dir / f"run_{timestamp}"
-        latest_run.rename(archived_run)
+        try:
+            latest_run.rename(archived_run)
+        except PermissionError:
+            # If latest_run is open in another process (for example the live app),
+            # keep it in place and write the new training outputs to a timestamped folder.
+            archived_run.mkdir(parents=True, exist_ok=True)
+            return archived_run
 
     latest_run.mkdir(parents=True, exist_ok=True)
     return latest_run

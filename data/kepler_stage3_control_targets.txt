@@ -1,0 +1,8 @@
+# Stage 3 Kepler quiet-control targets
+# These are KIC targets reserved for non-KOI control-star experiments.
+# Add one target per line using the format:
+# KIC 1234567
+
+KIC 5807616
+KIC 6129514
+KIC 12068971

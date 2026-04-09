@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
@@ -26,6 +26,8 @@ class RealTransitLabelingReport:
     positive_examples: int
     negative_examples: int
     skipped_examples: int
+    hard_negative_examples: int = 0
+    example_role_counts: dict[str, int] = field(default_factory=dict)
 
 
 def _normalize_target_name(value: str) -> str:
@@ -38,9 +40,19 @@ def _prepare_koi_catalog(koi_catalog: pd.DataFrame) -> pd.DataFrame:
     """Keep only the KOI rows and columns needed for Stage 3."""
     catalog = koi_catalog.copy()
     catalog["kepler_name"] = catalog["kepler_name"].fillna("")
-    catalog["target_key"] = catalog["kepler_name"].map(_normalize_target_name)
     catalog["koi_disposition"] = catalog["koi_disposition"].fillna("")
-    catalog = catalog[catalog["koi_disposition"].isin(KEPLER_POSITIVE_DISPOSITIONS)]
+    catalog["target_key"] = catalog["kepler_name"].map(_normalize_target_name)
+    empty_target_mask = catalog["target_key"].str.strip() == ""
+    catalog.loc[empty_target_mask & catalog["kepid"].notna(), "target_key"] = catalog.loc[
+        empty_target_mask & catalog["kepid"].notna(),
+        "kepid",
+    ].map(lambda value: _normalize_target_name(f"KIC {int(value)}"))
+    catalog = catalog[
+        catalog["koi_disposition"].isin(KEPLER_POSITIVE_DISPOSITIONS | {"FALSE POSITIVE"})
+        & (catalog["target_key"].str.strip() != "")
+    ]
+    catalog["is_positive_candidate"] = catalog["koi_disposition"].isin(KEPLER_POSITIVE_DISPOSITIONS)
+    catalog["is_false_positive_candidate"] = catalog["koi_disposition"] == "FALSE POSITIVE"
     catalog["period_days"] = catalog["koi_period"].astype(float)
     catalog["epoch_reference"] = catalog["koi_time0bk"].astype(float)
     catalog["duration_days"] = catalog["koi_duration"].astype(float) / 24.0
@@ -51,9 +63,11 @@ def _prepare_toi_catalog(toi_catalog: pd.DataFrame) -> pd.DataFrame:
     """Keep only the TOI rows and columns needed for Stage 4."""
     catalog = toi_catalog.copy()
     catalog["tfopwg_disp"] = catalog["tfopwg_disp"].fillna("")
-    catalog = catalog[catalog["tfopwg_disp"].isin(TESS_POSITIVE_DISPOSITIONS)]
+    catalog = catalog[catalog["tfopwg_disp"].isin(TESS_POSITIVE_DISPOSITIONS | {"FP", "FA"})]
     catalog = catalog[catalog["tid"].notna()]
     catalog["target_key"] = catalog["tid"].map(lambda value: _normalize_target_name(f"TIC {int(value)}"))
+    catalog["is_positive_candidate"] = catalog["tfopwg_disp"].isin(TESS_POSITIVE_DISPOSITIONS)
+    catalog["is_false_positive_candidate"] = catalog["tfopwg_disp"].isin({"FP", "FA"})
     catalog["period_days"] = catalog["pl_orbper"].astype(float)
     catalog["epoch_reference"] = catalog["pl_tranmid"].astype(float)
     catalog.loc[catalog["epoch_reference"] > 1_000_000, "epoch_reference"] -= 2457000.0
@@ -116,6 +130,7 @@ def create_real_labeled_examples(
     matched_targets: set[str] = set()
     seen_targets: set[str] = set()
     skipped_examples = 0
+    hard_negative_examples = 0
 
     for window in windows:
         target_key = _normalize_target_name(window.target_name)
@@ -123,10 +138,14 @@ def create_real_labeled_examples(
         target_rows = catalog_by_target.get(target_key)
 
         label = 0
+        example_role = "background_negative_window"
         ambiguous_window = False
         if target_rows is not None and not target_rows.empty:
             matched_targets.add(target_key)
-            for _, row in target_rows.iterrows():
+            positive_rows = target_rows[target_rows["is_positive_candidate"]]
+            false_positive_rows = target_rows[target_rows["is_false_positive_candidate"]]
+
+            for _, row in positive_rows.iterrows():
                 transit_centers = _compute_transit_centers(
                     period_days=float(row["period_days"]),
                     epoch_bkjd=float(row["epoch_reference"]),
@@ -142,11 +161,34 @@ def create_real_labeled_examples(
                     )
                     if overlap_fraction >= 0.5:
                         label = 1
+                        example_role = "positive_transit_window"
                         break
                     if 0.15 <= overlap_fraction < 0.5:
                         ambiguous_window = True
                 if label == 1 or ambiguous_window:
                     break
+
+            if label == 0 and not ambiguous_window:
+                for _, row in false_positive_rows.iterrows():
+                    transit_centers = _compute_transit_centers(
+                        period_days=float(row["period_days"]),
+                        epoch_bkjd=float(row["epoch_reference"]),
+                        time_min=float(window.time_window[0]),
+                        time_max=float(window.time_window[-1]),
+                    )
+                    duration_days = float(row["duration_days"])
+                    for center in transit_centers:
+                        overlap_fraction = _transit_overlap_fraction(
+                            time_window=window.time_window,
+                            transit_center=float(center),
+                            duration_days=duration_days,
+                        )
+                        if overlap_fraction >= 0.5:
+                            example_role = "catalog_false_positive_event_window"
+                            hard_negative_examples += 1
+                            break
+                    if example_role == "catalog_false_positive_event_window":
+                        break
 
         if ambiguous_window:
             skipped_examples += 1
@@ -155,15 +197,21 @@ def create_real_labeled_examples(
         examples.append(
             LabeledExample(
                 target_name=window.target_name,
+                time=window.time_window,
                 flux=window.flux_window,
                 label=label,
                 injected=False,
                 source=window.source,
+                example_role=example_role,
             )
         )
 
     positive_examples = sum(example.label for example in examples)
     negative_examples = len(examples) - positive_examples
+    example_role_counts = {
+        role: sum(1 for example in examples if example.example_role == role)
+        for role in sorted({example.example_role for example in examples})
+    }
 
     report = RealTransitLabelingReport(
         matched_targets=len(matched_targets),
@@ -171,5 +219,7 @@ def create_real_labeled_examples(
         positive_examples=positive_examples,
         negative_examples=negative_examples,
         skipped_examples=skipped_examples,
+        hard_negative_examples=hard_negative_examples,
+        example_role_counts=example_role_counts,
     )
     return examples, report

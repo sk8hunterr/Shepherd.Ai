@@ -89,6 +89,7 @@ class ProjectConfig:
     minimum_total_lightcurves: int = 3
     auto_target_count: int | None = None
     min_tess_sector: int | None = None
+    max_positive_negative_ratio: float | None = None
 
     # Windowing keeps each training example the same shape.
     window_length: int = 200
@@ -105,6 +106,15 @@ class ProjectConfig:
     # Baseline model settings.
     test_size: float = 0.25
     logistic_max_iter: int = 1000
+    koi_false_positive_host_weight: float = 1.0
+    quiet_control_target_weight: float = 1.0
+    catalog_false_positive_event_weight: float = 1.0
+    hard_negative_probability_threshold: float = 0.5
+    hard_negative_top_percentile: float = 0.9
+    hard_negative_boost: float = 1.0
+    hard_positive_probability_threshold: float = 0.25
+    hard_positive_bottom_percentile: float = 0.2
+    hard_positive_boost: float = 1.0
 
     def __post_init__(self) -> None:
         self.data_dir = self.project_root / "data"
@@ -122,11 +132,21 @@ class ProjectConfig:
             self.minimum_total_lightcurves = 12
 
         if self.stage_name == "stage3":
-            self.max_lightcurves_per_target = 3
-            self.max_windows_per_lightcurve = 220
-            self.minimum_total_lightcurves = 18
+            self.max_lightcurves_per_target = 8
+            self.max_windows_per_lightcurve = 420
+            self.minimum_total_lightcurves = 72
             self.labeling_mode = "real_koi"
-            self.auto_target_count = 60
+            self.auto_target_count = 180
+            self.max_positive_negative_ratio = 1.0
+            self.koi_false_positive_host_weight = 1.35
+            self.quiet_control_target_weight = 1.15
+            self.catalog_false_positive_event_weight = 1.6
+            self.hard_negative_probability_threshold = 0.45
+            self.hard_negative_top_percentile = 0.88
+            self.hard_negative_boost = 2.25
+            self.hard_positive_probability_threshold = 0.24
+            self.hard_positive_bottom_percentile = 0.18
+            self.hard_positive_boost = 1.45
 
         if self.stage_name == "stage4":
             self.mission = "TESS"
@@ -137,6 +157,7 @@ class ProjectConfig:
             self.labeling_mode = "real_toi"
             self.auto_target_count = 60
             self.min_tess_sector = 94
+            self.max_positive_negative_ratio = 1.5
 
 
 def build_config(stage: str) -> ProjectConfig:

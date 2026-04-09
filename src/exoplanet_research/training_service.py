@@ -8,9 +8,9 @@ import os
 from .config import ProjectConfig, ensure_directories
 from .data_loader import load_light_curves
 from .evaluation import compute_metrics
-from .labeling import create_labeled_examples, examples_to_arrays
+from .labeling import create_labeled_examples, examples_to_arrays_with_targets
 from .modeling import train_baseline_model
-from .model_io import load_trained_model, save_trained_model
+from .model_io import get_model_path, get_model_path_for_version, load_trained_model, save_trained_model
 from .model_registry import ModelVersion, get_model_version
 from .preprocessing import build_window_dataset
 
@@ -45,7 +45,7 @@ def _bundle_from_saved_payload(
         data_message=str(saved_payload.get("data_message", "Saved model loaded from disk.")),
         num_examples=int(saved_payload.get("num_examples", 0)),
         metrics=dict(saved_payload.get("metrics", {})),
-        model_path=str(config.model_dir / f"baseline_{config.stage_name}_model.joblib"),
+        model_path=str(saved_payload.get("model_path", get_model_path(config))),
         loaded_from_disk=True,
         version_name=model_version.display_name,
         version_description=model_version.description,
@@ -61,7 +61,10 @@ def prepare_screening_model(version_id: str) -> ScreeningModelBundle:
     config = ProjectConfig(stage_name=model_version.stage_name)
     ensure_directories(config)
 
-    saved_payload = load_trained_model(config)
+    saved_payload = load_trained_model(
+        config,
+        model_path=get_model_path_for_version(config, model_version),
+    )
     if saved_payload is not None:
         return _bundle_from_saved_payload(
             saved_payload=saved_payload,
@@ -80,8 +83,8 @@ def prepare_screening_model(version_id: str) -> ScreeningModelBundle:
     lightcurves, data_message = load_light_curves(config, allow_fallback=True)
     windows = build_window_dataset(lightcurves, config)
     examples = create_labeled_examples(windows, config)
-    X, y = examples_to_arrays(examples)
-    artifacts = train_baseline_model(X, y, config)
+    X, y, target_names = examples_to_arrays_with_targets(examples)
+    artifacts = train_baseline_model(X, y, config, groups=target_names)
     metrics = compute_metrics(artifacts.y_test, artifacts.y_pred)
     model_path = save_trained_model(
         model=artifacts.model,
@@ -89,6 +92,8 @@ def prepare_screening_model(version_id: str) -> ScreeningModelBundle:
         metrics=metrics,
         data_message=data_message,
         num_examples=len(examples),
+        model_name=artifacts.model_name,
+        recommended_threshold=model_version.recommended_threshold,
     )
 
     return ScreeningModelBundle(

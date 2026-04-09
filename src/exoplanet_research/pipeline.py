@@ -13,8 +13,10 @@ from .evaluation import (
     compute_curve_data,
     compute_metrics,
     compute_probability_metrics,
+    build_diagnostic_report,
     find_best_threshold,
     save_metrics,
+    save_diagnostic_report,
     save_model_comparison,
 )
 from .modeling import train_model_comparison
@@ -44,9 +46,21 @@ def run_pipeline(stage: str = "stage1", allow_fallback: bool = True) -> None:
     # Step 1: Prepare and save the dataset so it can be reused in future training runs.
     prepared_dataset = prepare_training_dataset(config, allow_fallback=allow_fallback)
     X, y = prepared_dataset.X, prepared_dataset.y
+    target_names = prepared_dataset.target_names
+    time_windows = prepared_dataset.time_windows
+    target_roles = prepared_dataset.target_roles
+    example_roles = prepared_dataset.example_roles
 
     # Step 2: Train and compare multiple simple baseline models on the prepared dataset.
-    model_artifacts_list = train_model_comparison(X, y, config)
+    model_artifacts_list = train_model_comparison(
+        X,
+        y,
+        config,
+        groups=target_names,
+        time_windows=time_windows,
+        target_roles=target_roles,
+        example_roles=example_roles,
+    )
     comparison_rows: list[dict[str, object]] = []
     best_artifacts = None
     best_metrics = None
@@ -91,6 +105,17 @@ def run_pipeline(stage: str = "stage1", allow_fallback: bool = True) -> None:
     artifacts = best_artifacts
     metrics = best_metrics
     confusion = best_confusion
+    test_target_roles = target_roles[artifacts.test_indices]
+    test_example_roles = example_roles[artifacts.test_indices]
+    diagnostic_report = build_diagnostic_report(
+        y_true=artifacts.y_test,
+        y_pred=artifacts.y_pred,
+        y_prob=artifacts.y_prob,
+        target_names=artifacts.test_target_names,
+        target_roles=test_target_roles,
+        example_roles=test_example_roles,
+        best_threshold=best_threshold,
+    )
 
     # Step 3: Save the best model and the comparison results.
     save_metrics(
@@ -101,12 +126,16 @@ def run_pipeline(stage: str = "stage1", allow_fallback: bool = True) -> None:
         best_threshold=best_threshold,
     )
     save_model_comparison(comparison_rows, run_output_dir)
+    save_diagnostic_report(diagnostic_report, run_output_dir)
     model_path = save_trained_model(
         model=artifacts.model,
         config=config,
         metrics=metrics,
         data_message=prepared_dataset.data_message,
         num_examples=prepared_dataset.num_examples,
+        model_name=artifacts.model_name,
+        recommended_threshold=best_threshold["threshold"],
+        save_mode="experiment",
     )
 
     # Step 4: Save figures and summaries for the latest run only.
@@ -140,6 +169,7 @@ def run_pipeline(stage: str = "stage1", allow_fallback: bool = True) -> None:
         f"Number of labeled examples: {prepared_dataset.num_examples}",
         f"Training examples: {len(artifacts.X_train)}",
         f"Test examples: {len(artifacts.X_test)}",
+        f"Feature count: {artifacts.X_train.shape[1]}",
         f"Labeling mode: {config.labeling_mode}",
         f"Prepared dataset path: {prepared_dataset.dataset_path}",
         "",
@@ -158,6 +188,16 @@ def run_pipeline(stage: str = "stage1", allow_fallback: bool = True) -> None:
             f"skipped ambiguous windows={real_label_report.skipped_examples}"
         )
     if prepared_dataset.catalog_message or prepared_dataset.real_label_report is not None:
+        summary_lines.append("")
+    if len(target_roles) > 0:
+        summary_lines.append("Target role counts:")
+        for role in sorted(set(target_roles.tolist())):
+            summary_lines.append(f"- {role}: {int(np.sum(target_roles == role))}")
+        summary_lines.append("")
+    if len(example_roles) > 0:
+        summary_lines.append("Example role counts:")
+        for role in sorted(set(example_roles.tolist())):
+            summary_lines.append(f"- {role}: {int(np.sum(example_roles == role))}")
         summary_lines.append("")
     summary_lines.append("Model comparison:")
     for row in comparison_rows:
@@ -184,6 +224,7 @@ def run_pipeline(stage: str = "stage1", allow_fallback: bool = True) -> None:
     summary_lines.append(f"- f1_score: {best_threshold['f1_score']:.4f}")
     summary_lines.append("")
     summary_lines.append(f"Saved model path: {model_path}")
+    summary_lines.append(f"Diagnostic report: {run_output_dir / 'diagnostic_report.txt'}")
     summary_lines.append("")
     summary_lines.append(f"Confusion matrix:\n{confusion}")
 
